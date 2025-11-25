@@ -3,10 +3,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './src/config/database';
 
-import authRoutes from './src/routes/auth.js';
-import incomeRoutes from './src/routes/income.js';
-import expenseRoutes from './src/routes/expense.js';
-import bazarRoutes from './src/routes/bazar.js'
+import authRoutes from './src/routes/auth';
+import incomeRoutes from './src/routes/income';
+import expenseRoutes from './src/routes/expense';
+import bazarRoutes from './src/routes/bazar';
+
 // Load env vars
 dotenv.config();
 
@@ -20,7 +21,6 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-
 app.use('/api/auth', authRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expense', expenseRoutes);
