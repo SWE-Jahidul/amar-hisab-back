@@ -7,6 +7,7 @@ import authRoutes from './src/routes/auth';
 import incomeRoutes from './src/routes/income';
 import expenseRoutes from './src/routes/expense';
 import bazarRoutes from './src/routes/bazar';
+import statRoutes from './src/routes/stats';
 
 // Load env vars
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expense', expenseRoutes);
 app.use('/api/bazar', bazarRoutes);
+app.use('/api/stats', statRoutes);
 
 // Test route
 app.get('/', (req: Request, res: Response) => {
