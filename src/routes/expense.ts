@@ -5,6 +5,74 @@ import { AuthRequest, IncomeExpenseRequest } from '../types';
 
 const router = express.Router();
 
+// Get Today's Expense
+router.get('/stats/today', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const expenses = await Expense.find({
+      user: req.user!._id,
+      date: { $gte: startOfDay, $lte: endOfDay }
+    });
+
+    const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+    res.json({
+      success: true,
+      todayExpense: total,
+      count: expenses.length,
+      expenses
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: (error as Error).message
+    });
+  }
+});
+
+// Get Monthly Expense
+router.get('/stats/monthly', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const endOfMonth = new Date();
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+    endOfMonth.setDate(0);
+    endOfMonth.setHours(23, 59, 59, 999);
+
+    const expenses = await Expense.find({
+      user: req.user!._id,
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    });
+
+    const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+    res.json({
+      success: true,
+      monthlyExpense: total,
+      count: expenses.length,
+      month: startOfMonth.toLocaleString('default', { month: 'long', year: 'numeric' }),
+      expenses
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: (error as Error).message
+    });
+  }
+});
+
 // Create Expense
 router.post('/', auth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -56,7 +124,7 @@ router.get('/', auth, async (req: AuthRequest, res: Response): Promise<void> => 
   }
 });
 
-// Get Single Expense
+// Get Single Expense - MUST be after /stats routes
 router.get('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const expense = await Expense.findOne({
