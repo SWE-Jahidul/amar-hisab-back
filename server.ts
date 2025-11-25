@@ -2,7 +2,6 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './src/config/database';
-
 import authRoutes from './src/routes/auth';
 import incomeRoutes from './src/routes/income';
 import expenseRoutes from './src/routes/expense';
