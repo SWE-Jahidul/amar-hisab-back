@@ -49,6 +49,21 @@ export interface RegisterRequest {
 
 export interface LoginRequest {
   phone: string;
+  username: string;
+}
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+  user?: {
+    id: string;
+    phone: string;
+    username: string;
+  };
+  error?: string;
+}
+export interface LoginRequest {
+  phone: string;
 }
 
 export interface IncomeExpenseRequest {

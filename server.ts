@@ -13,7 +13,6 @@ dotenv.config();
 
 // Connect to database
 connectDB();
-
 const app: Application = express();
 
 // Middleware

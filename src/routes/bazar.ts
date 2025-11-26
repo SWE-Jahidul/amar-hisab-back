@@ -1,11 +1,11 @@
 import express, { Response } from 'express';
-import auth from '../middleware/auth';
+import { authMiddleware } from '../middleware/auth';
 import { AuthRequest } from '../types';
 import Bazar from '../models/Bazar';
 
 const router = express.Router();
 
-router.post('/', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { item, quantity, price, date } = req.body;
     const bazar = new Bazar({
@@ -33,7 +33,7 @@ router.post('/', auth, async (req: AuthRequest, res: Response): Promise<void> =>
 });
 
 // Get all Bazar entries for user
-router.get('/', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const bazars = await Bazar.find({ user: req.user!._id }).sort({ date: -1 });
 
@@ -52,7 +52,7 @@ router.get('/', auth, async (req: AuthRequest, res: Response): Promise<void> => 
 });
 
 // Get single Bazar entry
-router.get('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const bazar = await Bazar.findOne({ _id: req.params.id, user: req.user!._id });
 
@@ -72,7 +72,7 @@ router.get('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> 
 });
 
 // Update Bazar entry
-router.put('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { item, quantity, price, date } = req.body;
 
@@ -98,7 +98,7 @@ router.put('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> 
 });
 
 // Delete Bazar entry
-router.delete('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const bazar = await Bazar.findOneAndDelete({ _id: req.params.id, user: req.user!._id });
 

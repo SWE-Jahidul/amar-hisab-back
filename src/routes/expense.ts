@@ -1,12 +1,12 @@
 import express, { Response } from 'express';
 import Expense from '../models/Expense';
-import auth from '../middleware/auth';
 import { AuthRequest, IncomeExpenseRequest } from '../types';
+import { authMiddleware } from '../middleware/auth';
 
 const router = express.Router();
 
 // Get Today's Expense
-router.get('/stats/today', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/stats/today', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -38,7 +38,7 @@ router.get('/stats/today', auth, async (req: AuthRequest, res: Response): Promis
 });
 
 // Get Monthly Expense
-router.get('/stats/monthly', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/stats/monthly', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
@@ -74,7 +74,7 @@ router.get('/stats/monthly', auth, async (req: AuthRequest, res: Response): Prom
 });
 
 // Create Expense
-router.post('/', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { amount, description, category, date } = req.body as IncomeExpenseRequest;
 
@@ -104,7 +104,7 @@ router.post('/', auth, async (req: AuthRequest, res: Response): Promise<void> =>
 });
 
 // Get All Expenses for User
-router.get('/', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const expenses = await Expense.find({ user: req.user!._id })
       .sort({ date: -1 });
@@ -125,7 +125,7 @@ router.get('/', auth, async (req: AuthRequest, res: Response): Promise<void> => 
 });
 
 // Get Single Expense - MUST be after /stats routes
-router.get('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const expense = await Expense.findOne({
       _id: req.params.id,
@@ -155,7 +155,7 @@ router.get('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> 
 });
 
 // Update Expense
-router.put('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { amount, description, category, date } = req.body as IncomeExpenseRequest;
 
@@ -189,7 +189,7 @@ router.put('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> 
 });
 
 // Delete Expense
-router.delete('/:id', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const expense = await Expense.findOneAndDelete({
       _id: req.params.id,

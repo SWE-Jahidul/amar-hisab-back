@@ -1,13 +1,13 @@
 import express, { Response } from 'express';
 import Income from '../models/Income';
 import Expense from '../models/Expense';
-import auth from '../middleware/auth';
 import { AuthRequest } from '../types';
+import { authMiddleware } from '../middleware/auth';
 
 const router = express.Router();
 
 // Get Monthly Net Balance
-router.get('/monthly/net', auth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/monthly/net', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
