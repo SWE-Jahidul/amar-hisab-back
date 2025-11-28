@@ -97,10 +97,14 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response): Prom
   }
 });
 
-// Delete Bazar entry
+// Delete Bazar entry (Soft Delete for Sync)
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const bazar = await Bazar.findOneAndDelete({ _id: req.params.id, user: req.user!._id });
+    const bazar = await Bazar.findOneAndUpdate(
+      { _id: req.params.id, user: req.user!._id },
+      { isDeleted: true, syncedAt: new Date() },
+      { new: true }
+    );
 
     if (!bazar) {
       res.status(404).json({ success: false, message: 'Bazar entry not found' });

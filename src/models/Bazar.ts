@@ -7,6 +7,8 @@ export interface IBazar extends Document {
   price: number;
   user: Types.ObjectId;
   date: Date;
+  syncedAt: Date;
+  isDeleted: boolean;
 }
 
 const bazarSchema = new Schema<IBazar>({
@@ -31,9 +33,21 @@ const bazarSchema = new Schema<IBazar>({
   date: {
     type: Date,
     default: Date.now
+  },
+  syncedAt: {
+    type: Date,
+    default: Date.now
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
 });
+
+// Indexes for efficient sync queries
+bazarSchema.index({ user: 1, updatedAt: 1 });
+bazarSchema.index({ user: 1, isDeleted: 1 });
 
 export default model<IBazar>('Bazar', bazarSchema);

@@ -16,6 +16,8 @@ export interface IIncome extends Document {
   description: string;
   category: string;
   date: Date;
+  syncedAt: Date;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,15 +29,23 @@ export interface IExpense extends Document {
   description: string;
   category: string;
   date: Date;
+  syncedAt: Date;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IBazar extends Document {
   _id: ObjectId;
+  user: ObjectId;
   item: string;
   quantity: number;
   price: number;
+  date: Date;
+  syncedAt: Date;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AuthRequest extends Request {
@@ -79,10 +89,13 @@ export interface JwtPayload {
 
 export interface INote extends Document {
   _id: ObjectId;
+  user: ObjectId;
   title: string;
   description: string;
   notificationDate?: Date;
   isNotified: boolean;
+  syncedAt: Date;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
