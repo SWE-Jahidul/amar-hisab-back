@@ -76,3 +76,33 @@ export interface IncomeExpenseRequest {
 export interface JwtPayload {
   userId: string;
 }
+
+export interface INote extends Document {
+  _id: ObjectId;
+  title: string;
+  description: string;
+  notificationDate?: Date;
+  isNotified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateNoteData {
+  title: string;
+  description: string;
+  notificationDate?: string;
+}
+
+export interface UpdateNoteData {
+  title?: string;
+  description?: string;
+  notificationDate?: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: string;
+  count?: number;
+}

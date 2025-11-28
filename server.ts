@@ -7,7 +7,7 @@ import incomeRoutes from './src/routes/income';
 import expenseRoutes from './src/routes/expense';
 import bazarRoutes from './src/routes/bazar';
 import statRoutes from './src/routes/stats';
-
+import notesRoutes from './src/routes/notes';
 // Load env vars
 dotenv.config();
 
@@ -25,6 +25,7 @@ app.use('/api/income', incomeRoutes);
 app.use('/api/expense', expenseRoutes);
 app.use('/api/bazar', bazarRoutes);
 app.use('/api/stats', statRoutes);
+app.use('/api/notes', notesRoutes);
 
 // Test route
 app.get('/', (req: Request, res: Response) => {
