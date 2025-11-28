@@ -90,13 +90,13 @@ export interface INote extends Document {
 export interface CreateNoteData {
   title: string;
   description: string;
-  notificationDate?: string;
+  notificationDate?: string; // ISO string with datetime
 }
 
 export interface UpdateNoteData {
   title?: string;
   description?: string;
-  notificationDate?: string;
+  notificationDate?: string; // ISO string with datetime
 }
 
 export interface ApiResponse<T> {

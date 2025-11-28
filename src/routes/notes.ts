@@ -26,9 +26,19 @@ router.post('/', async (req: express.Request<{}, {}, CreateNoteData>, res: expre
     // Add notification date if provided
     if (notificationDate) {
       const notifDate = new Date(notificationDate);
+      
+      // Validate it's a valid date
+      if (isNaN(notifDate.getTime())) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid notification date format'
+        });
+        return;
+      }
+      
       noteData.notificationDate = notifDate;
       
-      // Validate notification date is in the future
+      // Validate notification datetime is in the future
       if (notifDate <= new Date()) {
         res.status(400).json({
           success: false,
@@ -113,10 +123,20 @@ router.put('/:id', async (req: express.Request<{ id: string }, {}, UpdateNoteDat
     
     if (notificationDate) {
       const notifDate = new Date(notificationDate);
+      
+      // Validate it's a valid date
+      if (isNaN(notifDate.getTime())) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid notification date format'
+        });
+        return;
+      }
+      
       updateData.notificationDate = notifDate;
       updateData.isNotified = false; // Reset notification status when date changes
       
-      // Validate notification date is in the future
+      // Validate notification datetime is in the future
       if (notifDate <= new Date()) {
         res.status(400).json({
           success: false,
