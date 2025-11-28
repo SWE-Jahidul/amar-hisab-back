@@ -1,20 +1,45 @@
 import cron from 'node-cron';
+import webPush from 'web-push';
 import { Note } from '../models/Note';
 
-// Function to check and send notifications (exactly 3 days before the event datetime)
+// Web Push VAPID keys
+const vapidKeys = {
+  publicKey: process.env.VAPID_PUBLIC_KEY || 'your-public-vapid-key',
+  privateKey: process.env.VAPID_PRIVATE_KEY || 'your-private-vapid-key'
+};
+
+// Configure web-push with VAPID keys
+webPush.setVapidDetails(
+  'mailto:your-email@example.com',
+  vapidKeys.publicKey,
+  vapidKeys.privateKey
+);
+
+// In-memory store for push subscriptions
+const pushSubscriptions: any[] = [];
+
+// Function to add push subscription
+export const addPushSubscription = (subscription: any): void => {
+  pushSubscriptions.push(subscription);
+  console.log('New push subscription added');
+};
+
+// Function to get VAPID public key
+export const getVapidPublicKey = (): string => {
+  return vapidKeys.publicKey;
+};
+
+// Function to check and send notifications at exact user-selected time
 export const checkAndSendNotifications = async (): Promise<void> => {
   try {
     const now = new Date();
     console.log(`Checking for notifications at: ${now.toISOString()}`);
 
-    // Calculate the exact datetime 3 days from now
-    const threeDaysFromNow = new Date(now.getTime() + (3 * 24 * 60 * 60 * 1000));
-    
-    // Create a time window (e.g., ±1 minute) to account for cron job timing
-    const timeWindowStart = new Date(threeDaysFromNow.getTime() - 60000); // 1 minute before
-    const timeWindowEnd = new Date(threeDaysFromNow.getTime() + 60000);   // 1 minute after
+    // Create a time window (current minute) to account for cron job timing
+    const timeWindowStart = new Date(now.getTime() - 30000); // 30 seconds before
+    const timeWindowEnd = new Date(now.getTime() + 30000);   // 30 seconds after
 
-    // Find notes where notification date falls within our 3-day window
+    // Find notes where notification date falls within current minute window
     // and haven't been notified yet
     const notesToNotify = await Note.find({
       notificationDate: {
@@ -33,7 +58,7 @@ export const checkAndSendNotifications = async (): Promise<void> => {
       note.isNotified = true;
       await note.save();
       
-      console.log(`Notification sent for note: ${note.title}`);
+      console.log(`Notification sent for note: "${note.title}" at ${now.toISOString()}`);
     }
   } catch (error) {
     console.error('Error in notification service:', error);
@@ -49,24 +74,83 @@ const sendNotification = async (note: any): Promise<void> => {
     
     Title: ${note.title}
     Description: ${note.description}
-    Event Date & Time: ${notificationDate ? notificationDate.toLocaleString() : 'N/A'}
-    
-    This is your 3-day reminder for this event!
+    Reminder Time: ${notificationDate ? notificationDate.toLocaleString() : 'N/A'}
   `;
   
   console.log('NOTIFICATION:', notificationMessage);
   
-  // Here you can integrate with:
-  // - Email services (Nodemailer)
-  // - Push notifications
-  // - SMS services
-  // - WebSocket for real-time notifications
+  // Send push notifications to all subscribers
+  await sendPushNotification(note);
+};
+
+// Function to send push notification
+const sendPushNotification = async (note: any): Promise<void> => {
+  const notificationDate = note.notificationDate ? new Date(note.notificationDate) : null;
+  
+  const payload = JSON.stringify({
+    title: '📅 Note Reminder',
+    body: `${note.title}\n${note.description}`,
+    icon: '/icon.png',
+    badge: '/badge.png',
+    timestamp: notificationDate ? notificationDate.getTime() : Date.now(),
+    data: {
+      noteId: note._id.toString(),
+      url: `/notes/${note._id}`
+    },
+    actions: [
+      {
+        action: 'view',
+        title: 'View Note'
+      },
+      {
+        action: 'dismiss',
+        title: 'Dismiss'
+      }
+    ]
+  });
+
+  // Send to all subscribers
+  const sendPromises = pushSubscriptions.map(async (subscription, index) => {
+    try {
+      await webPush.sendNotification(subscription, payload);
+      console.log(`Push notification sent to subscriber ${index + 1}`);
+    } catch (error: any) {
+      console.error(`Error sending push notification to subscriber ${index + 1}:`, error);
+      
+      // Remove invalid subscriptions
+      if (error.statusCode === 410) {
+        pushSubscriptions.splice(index, 1);
+        console.log('Removed invalid subscription');
+      }
+    }
+  });
+
+  await Promise.all(sendPromises);
+};
+
+// Function to send immediate test notification
+export const sendTestNotification = async (): Promise<void> => {
+  const payload = JSON.stringify({
+    title: 'Test Notification',
+    body: 'This is a test push notification from your notes app!',
+    icon: '/icon.png',
+    badge: '/badge.png'
+  });
+
+  const sendPromises = pushSubscriptions.map(async (subscription, index) => {
+    try {
+      await webPush.sendNotification(subscription, payload);
+      console.log(`Test notification sent to subscriber ${index + 1}`);
+    } catch (error: any) {
+      console.error(`Error sending test notification to subscriber ${index + 1}:`, error);
+    }
+  });
+
+  await Promise.all(sendPromises);
 };
 
 // Start the cron job to check notifications every minute
 export const startNotificationScheduler = (): void => {
-  // Run every minute to check for notifications
   cron.schedule('* * * * *', checkAndSendNotifications);
-  
   console.log('Notification scheduler started - checking every minute');
 };
